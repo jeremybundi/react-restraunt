@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import AppRoutes from './routes';
 import logo from './assets/logo.jpg';
 
 function App() {
-  // State to manage the dropdown visibility
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [user, setUser] = useState(null); // State to manage user info
+  const navigate = useNavigate();
 
   // Toggle dropdown visibility
   const toggleDropdown = () => {
@@ -17,8 +18,28 @@ function App() {
     setIsDropdownOpen(false);
   };
 
+  // Logout function to clear the localStorage and reset user state
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('name');
+    localStorage.removeItem('role');
+    setUser(null);
+    navigate('/'); // Redirect to home page after logout
+  };
+
+  // On component mount, check if user is logged in by checking localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const name = localStorage.getItem('name');
+    const role = localStorage.getItem('role');
+
+    if (token && name && role) {
+      setUser({ name, role });
+    }
+  }, []); // Empty dependency array ensures this effect runs once
+
   return (
-    <div className="bg-gradient-to-r from-gray-800 via-gray-900 to-indigo-600 text-white font-sans min-h-screen">
+    <div className="bg-gradient-to-r from-slate-900 via-gray-900 to-slate-600 text-white font-sans min-h-screen">
       {/* Top Section with Logo, Title, Centered Links, and Login Links */}
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between p-4">
         {/* Logo and Title Side-by-Side */}
@@ -37,16 +58,29 @@ function App() {
           </nav>
         </div>
 
-        {/* Login Link with Dropdown */}
+        {/* User Info and Dropdown */}
         <div className="relative">
-          <span 
-            onClick={toggleDropdown} 
-            className="cursor-pointer text-white hover:underline"
-          >
-            Login
-          </span>
+          {user ? (
+            <>
+              <span className="mr-4">Welcome, {user.name}</span>
+              <span 
+                onClick={handleLogout} 
+                className="cursor-pointer text-white hover:underline"
+              >
+                Logout
+              </span>
+            </>
+          ) : (
+            <span 
+              onClick={toggleDropdown} 
+              className="cursor-pointer text-white hover:underline"
+            >
+              Login
+            </span>
+          )}
+
           {/* Dropdown Menu */}
-          {isDropdownOpen && (
+          {isDropdownOpen && !user && (
             <div 
               className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg"
               onMouseLeave={closeDropdown} // Close on mouse leave
@@ -71,7 +105,7 @@ function App() {
       </div>
 
       {/* Bottom Section for Additional Links (Optional) */}
-      <div className="bg-indigo-800 py-3 mt-4 rounded-lg">
+      <div className="bg-slate-100 py-3 mt-4 rounded-lg">
         <div className="container mx-auto text-center">
           <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-8">
             {/* Optional additional links can go here */}

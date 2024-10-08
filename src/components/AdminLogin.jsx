@@ -48,7 +48,7 @@ const AdminLogin = () => {
       // Here, you can redirect the admin or perform additional actions upon successful login
     } catch (err) {
       setError('Failed to verify OTP. Please try again.'); // Set error message
-      console.error('Error:', err);
+      console.error('Error:', err);a
     }
   };
 
