@@ -1,66 +1,64 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { setAuth } from '../store/store';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const AdminLogin = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate(); // Initialize navigate
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     otp: '',
   });
 
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(1);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    setError(''); 
+    setError('');
   };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    
     try {
       const response = await axios.post('/api/admin/login', {
         email: formData.email,
         password: formData.password,
       });
-      setSuccessMessage('OTP sent to your email!'); 
-      setStep(2); 
-      console.log('Response:', response.data);
+      setSuccessMessage('OTP sent to your email!');
+      setStep(2);
     } catch (err) {
-      setError('Failed to send OTP. Please check your credentials and try again.'); 
-      console.error('Error:', err);
+      setError('Failed to send OTP. Please check your credentials and try again.');
     }
   };
 
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
-    
     try {
       const response = await axios.post('/api/admin/verify-otp', {
         email: formData.email,
         otp: formData.otp,
       });
-      setSuccessMessage('Logged in successfully!'); // Set success message
-      console.log('Response:', response.data);
-      // Here, you can redirect the admin or perform additional actions upon successful login
-    } catch (err) {
-      setError('Failed to verify OTP. Please try again.'); // Set error message
-      console.error('Error:', err);a
-    }
-  };
 
-  const handleCancel = () => {
-    setFormData({
-      email: '',
-      password: '',
-      otp: '',
-    });
-    setError('');
-    setSuccessMessage('');
-    setStep(1); // Reset to step 1
+      // Assuming the response contains token, name, and role
+      const { token, name, role } = response.data;
+
+      // Save token, name, and role to Redux store
+      dispatch(setAuth({ token, name, role }));
+
+      setSuccessMessage('Logged in successfully!');
+
+      // Navigate to home component after successful login
+      navigate('/'); // Add this line to navigate to the home page
+    } catch (err) {
+      setError('Failed to verify OTP. Please try again.');
+    }
   };
 
   return (
@@ -69,7 +67,7 @@ const AdminLogin = () => {
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">{step === 1 ? 'Admin Login' : 'Enter OTP'}</h2>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         {successMessage && <p className="text-green-500 text-center mb-4">{successMessage}</p>}
-        
+
         {step === 1 ? (
           <form onSubmit={handleLoginSubmit}>
             <div className="mb-4">
@@ -98,7 +96,7 @@ const AdminLogin = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md transition duration-200 hover:bg-blue-600"
+              className="w-full bg-lime-950 text-white font-semibold py-2 px-4 font-sans rounded-md transition duration-200 hover:bg-lime-600"
             >
               Send OTP
             </button>
@@ -119,20 +117,18 @@ const AdminLogin = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md transition duration-200 hover:bg-blue-600"
+              className="w-full bg-lime-950 text-white font-semibold py-2 px-4 font-sans rounded-md transition duration-200 hover:bg-lime-400"
             >
               Verify OTP
             </button>
           </form>
         )}
 
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="mt-4 w-full bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md transition duration-200 hover:bg-gray-400"
-        >
-          Cancel
-        </button>
+        {/* Links for Register and Forgot Password */}
+        <div className="flex justify-between mt-4">
+          <a href="/admin/sign" className="text-blue-800 italic font-bold hover:underline">Register Now!</a>
+          <a href="/forgot-password" className="text-red-600 italic font-sm hover:underline">Forgot Password?</a>
+        </div>
       </div>
     </div>
   );

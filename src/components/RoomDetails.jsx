@@ -248,7 +248,7 @@ const RoomDetails = () => {
 
             <button
               type="submit"
-              className="bg-lime-900 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-300"
+              className="bg-slate-900 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-300"
             >
               Reserve Room
             </button>
